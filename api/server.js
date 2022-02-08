@@ -5,13 +5,8 @@ const server = express();
 
 server.use(express.json());
 
-// server.get('/', (req, res) => {
-//   console.log('received get request');
-//   res.json("hello world!");
-// });
-
 server.post('/api/users', (req, res) => {
-  let { body } = req;
+  const { body } = req;
 
   if(!body.name || !body.bio) {
     res.status(400).json({ message: "Please provide name and bio for the user" });
@@ -37,7 +32,7 @@ server.get('/api/users', (req, res) => {
 })
 
 server.get('/api/users/:id', (req, res) => {
-  let { id } = req.params;
+  const { id } = req.params;
 
   model.findById(id)
     .then(user => {
@@ -54,7 +49,7 @@ server.get('/api/users/:id', (req, res) => {
 })
 
 server.delete('/api/users/:id', (req, res) => {
-  let { id } = req.params;
+  const { id } = req.params;
 
   model.remove(id)
     .then(user => {
@@ -68,6 +63,26 @@ server.delete('/api/users/:id', (req, res) => {
     .catch(()=> {
       res.status(500).json({ message: 'The user could not be removed'})
     })
+})
+
+server.put('/api/users/:id', async (req, res) => {
+  const { id } = req.params;
+  const { body } = req;
+  try {
+    const updated = await model.update(id, body)
+    if (!updated) {
+      res.status(404).json({ message: 'The user with the specified ID does not exist' });
+    } else if 
+      (!body.name || !body.bio) {
+        res.status(400).json({ message: 'Please provide name and bio for the user'})
+    }else {
+      res.json(updated)
+    }
+  } catch(err) {
+      res.status(500).json({ message: 'The user information could not be modified',
+      error: err.message,
+   });
+  }
 })
 
 
